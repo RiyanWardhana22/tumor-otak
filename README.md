@@ -89,5 +89,5 @@ Untuk menjalankan aplikasi web ini di komputer lokal Anda:
 **Developer Contact:**
 
 - **Nama:** Riyan Wardhana
-- **Instagram:** [![Instagram](https://img.shields.io/badge/Instagram-%23E4405F.svg?logo=Instagram&logoColor=white)](https://instagram.com/riyan_wrdhna)
+- **Instagram:** [![Instagram]](https://instagram.com/riyan_wrdhna)
 - **Status:** Mahasiswa
