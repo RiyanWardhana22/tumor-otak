@@ -1,0 +1,90 @@
+/* ==== GLOBAL THEME (Liquid Glass - Light Minimalist) ==== */
+body {
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(135deg, #eaf3ff, #f6f8ff);
+  color: #333;
+  padding-top: 80px;
+  overflow-x: hidden;
+}
+
+/* ==== NAVBAR ==== */
+.glass-navbar {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(15px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+.navbar-brand {
+  color: #2563eb !important;
+  font-weight: 600;
+}
+.nav-link {
+  color: #333 !important;
+  margin-left: 1rem;
+  transition: all 0.3s ease;
+}
+.nav-link:hover,
+.nav-link.active {
+  color: #2563eb !important;
+}
+
+/* ==== CARD (Glassmorphism) ==== */
+.glass-card {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.glass-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* ==== BUTTON ==== */
+.btn-glass {
+  text-decoration: none;
+  background: linear-gradient(90deg, #4e8ef7, #6aa9ff);
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  padding: 10px 24px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(78, 142, 247, 0.3);
+}
+.btn-glass:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(78, 142, 247, 0.45);
+}
+
+/* ==== FOOTER ==== */
+.glass-footer {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px);
+  color: #555;
+  font-size: 0.9rem;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+}
+
+/* ==== CONTENT ==== */
+.content-wrapper {
+  min-height: 80vh;
+}
+
+/* ==== ANIMATIONS ==== */
+img,
+.btn-glass,
+.glass-card {
+  transition: all 0.3s ease;
+}
+
+/* ==== FADE-IN PAGE EFFECT ==== */
+.fade-body {
+  opacity: 0;
+  transform: translateY(15px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.fade-body.fade-in {
+  opacity: 1;
+  transform: translateY(0);
+}
