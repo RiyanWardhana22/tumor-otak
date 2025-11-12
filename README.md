@@ -83,3 +83,11 @@ Untuk menjalankan aplikasi web ini di komputer lokal Anda:
 5.  **Buka di Browser:**
     Aplikasi akan berjalan dalam mode debug di:
     `http://127.0.0.1:5000`
+
+## 📞 Support & Concact
+
+**Developer Contact:**
+
+- **Nama:** Riyan Wardhana
+- **Instagram:** [![Instagram](https://img.shields.io/badge/Instagram-%23E4405F.svg?logo=Instagram&logoColor=white)](https://instagram.com/riyan_wrdhna)
+- **Status:** Mahasiswa
