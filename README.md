@@ -23,19 +23,6 @@ Proyek ini adalah aplikasi web yang dibangun dengan Flask untuk mengklasifikasi 
 - **Lingkungan Pengembangan:** Jupyter Notebook (untuk pelatihan model)
 - **Frontend:** HTML, CSS (dan JavaScript untuk visualisasi data di halaman `classify.html`)
 
-## 📄 Struktur Proyek
-
-tumor_otak/
-│
-├── app.py # File utama aplikasi Flask (Backend)
-├── TrainingModel.ipynb # Notebook Jupyter untuk melatih model
-├── model.h5 # Model Keras (.h5) yang sudah dilatih
-│
-└── templates/
-├── layout.html # Template dasar (tidak disertakan, tapi direferensikan)
-├── home.html # Halaman beranda
-└── classify.html # Halaman untuk unggah & klasifikasi
-
 ## 🤖 Detail Model (TrainingModel.ipynb)
 
 Model `model.h5` dilatih menggunakan teknik _Transfer Learning_.
@@ -81,7 +68,7 @@ Untuk menjalankan aplikasi web ini di komputer lokal Anda:
     Anda memerlukan library Python yang digunakan dalam file `app.py` dan `TrainingModel.ipynb`.
 
     ```bash
-    pip install flask tensorflow numpy pillow
+    pip install tensorflow numpy matplotlib opencv-python pillow flask scipy
     ```
 
     _(Jika Anda ingin menjalankan notebook, tambahkan `matplotlib` dan `jupyter`)_
