@@ -10,7 +10,6 @@ model = tf.keras.models.load_model(model_path)
 class_names = ['Glioma Tumor', 'Meningioma Tumor', 'No Tumor', 'Pituitary Tumor']
 print(f"Model dari {model_path} berhasil dimuat.")
 
-# --- Fungsi Preprocessing  ---
 def preprocess_image(image_file):
     img = Image.open(image_file.stream).convert('RGB')
     img = img.resize((224, 224))
