@@ -89,5 +89,5 @@ Untuk menjalankan aplikasi web ini di komputer lokal Anda:
 **Developer Contact:**
 
 - **Nama:** Riyan Wardhana
-- **Instagram:** [![Instagram]](https://instagram.com/riyan_wrdhna)
+- **Instagram:** [@riyan_wrdhna](https://instagram.com/riyan_wrdhna)
 - **Status:** Mahasiswa
