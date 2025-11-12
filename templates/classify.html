@@ -1,0 +1,284 @@
+{% extends "layout.html" %} {% block title %}Klasifikasi Citra MRI{% endblock %}
+{% block content %}
+<div class="row g-4 align-items-start py-5">
+  <div class="col-lg-5">
+    <div class="glass-card p-4">
+      <h4 class="fw-semibold mb-3 text-center">Upload Citra MRI</h4>
+      <form id="upload-form">
+        <div class="mb-3">
+          <label for="image-file" class="form-label"
+            >Pilih file gambar (.jpg, .png)</label
+          >
+          <input
+            type="file"
+            id="image-file"
+            class="form-control"
+            accept=".jpg,.jpeg,.png"
+            required
+          />
+        </div>
+        <div class="d-grid">
+          <button type="submit" id="classify-btn" class="btn-glass">
+            Klasifikasikan
+          </button>
+        </div>
+      </form>
+      <div id="error-box" class="alert alert-danger mt-4 d-none"></div>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="glass-card p-4">
+      <h4 class="fw-semibold text-center mb-4">Hasil Klasifikasi</h4>
+      <div id="result-container" class="text-center d-none">
+        <img
+          id="preview-image"
+          src="#"
+          class="img-fluid rounded mb-3"
+          style="max-height: 250px"
+        />
+        <div id="result-box" class="alert alert-info">
+          <h5 id="result-text" class="mb-1 fs-4"></h5>
+          <p id="confidence-text" class="mb-0"></p>
+        </div>
+        <canvas id="probability-chart" class="mt-3"></canvas>
+        <div
+          id="interpretation-box"
+          class="alert alert-secondary mt-3 text-start"
+        >
+          <strong>Interpretasi:</strong>
+          <p id="interpretation-text" class="mb-0"></p>
+        </div>
+      </div>
+      <div
+        id="placeholder-text"
+        class="text-muted text-center"
+        style="
+          min-height: 300px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        "
+      >
+        <p>Hasil prediksi akan muncul setelah Anda mengunggah gambar.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %} {% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  // --- Catatan: Baris 'Chart.defaults.color = "#fff"' dihapus agar mudah dibaca ---
+
+  // Ambil elemen-elemen HTML
+  const uploadForm = document.getElementById("upload-form");
+  const imageFile = document.getElementById("image-file");
+  const previewImage = document.getElementById("preview-image");
+  const classifyBtn = document.getElementById("classify-btn");
+
+  // Elemen Hasil
+  const resultContainer = document.getElementById("result-container");
+  const placeholderText = document.getElementById("placeholder-text");
+  const resultBox = document.getElementById("result-box");
+  const resultText = document.getElementById("result-text");
+  const confidenceText = document.getElementById("confidence-text");
+  const errorBox = document.getElementById("error-box");
+
+  // Elemen Interpretasi
+  const interpretationBox = document.getElementById("interpretation-box");
+  const interpretationText = document.getElementById("interpretation-text");
+
+  // Elemen Grafik
+  const chartCanvas = document.getElementById("probability-chart");
+  let probabilityChart = null; // Variabel untuk menyimpan objek grafik
+
+  // Tampilkan preview gambar saat pengguna memilih file
+  imageFile.addEventListener("change", function (event) {
+    const file = event.target.files[0];
+    if (file) {
+      // Validasi file (Fitur #3)
+      const validTypes = ["image/jpeg", "image/png", "image/jpg"];
+      if (!validTypes.includes(file.type)) {
+        showError(
+          "Format file tidak valid. Harap gunakan .jpg, .png, atau .jpeg"
+        );
+        imageFile.value = ""; // Kosongkan input
+        return;
+      }
+
+      // Validasi ukuran (misal: maks 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        showError("Ukuran file terlalu besar. Maksimal 5MB.");
+        imageFile.value = ""; // Kosongkan input
+        return;
+      }
+
+      // Tampilkan preview
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        previewImage.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+
+      // --- PERBAIKAN DI SINI ---
+      // Sembunyikan hasil lama/error
+      resultContainer.classList.add("d-none"); // Ganti dari style.display
+      placeholderText.classList.remove("d-none"); // Ganti dari style.display
+      errorBox.classList.add("d-none"); // Ganti dari style.display
+    }
+  });
+
+  // Kirim gambar ke backend saat form disubmit
+  uploadForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
+    const file = imageFile.files[0];
+    if (!file) {
+      showError("Tolong pilih file gambar terlebih dahulu.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    setLoading(true);
+
+    try {
+      const response = await fetch("/predict", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        showResult(data); // Kirim semua data ke fungsi showResult
+      } else {
+        const errorData = await response.json();
+        showError(errorData.error || "Terjadi error yang tidak diketahui.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      showError("Tidak dapat terhubung ke server. Pastikan server berjalan.");
+    } finally {
+      setLoading(false);
+    }
+  });
+
+  // Fungsi untuk menampilkan hasil (Diperbarui)
+  function showResult(data) {
+    // Tampilkan teks hasil utama
+    resultText.textContent = data.predicted_class;
+    confidenceText.textContent = "Probabilitas: " + data.confidence;
+
+    // Tampilkan interpretasi
+    showInterpretation(data.predicted_class);
+
+    // --- PERBAIKAN DI SINI ---
+    // Tampilkan kontainer hasil dan sembunyikan placeholder
+    resultContainer.classList.remove("d-none"); // Ganti dari style.display
+    placeholderText.classList.add("d-none"); // Ganti dari style.display
+    errorBox.classList.add("d-none"); // Ganti dari style.display
+
+    // Panggil fungsi untuk membuat/memperbarui grafik
+    updateChart(data.class_names, data.probabilities);
+  }
+
+  // Fungsi untuk menampilkan interpretasi
+  function showInterpretation(className) {
+    let text = "";
+    if (className === "No Tumor") {
+      text =
+        "Hasil menunjukkan tidak ada tanda-tanda tumor yang terdeteksi pada gambar MRI. Ini adalah hasil normal.";
+      resultBox.classList.remove("alert-danger", "alert-warning");
+      resultBox.classList.add("alert-success");
+    } else if (className === "Pituitary Tumor") {
+      text =
+        "Terdeteksi adanya tumor Pituari. Tumor ini umumnya jinak dan tumbuh lambat di kelenjar pituitari.";
+      resultBox.classList.remove("alert-success", "alert-danger");
+      resultBox.classList.add("alert-warning");
+    } else {
+      // Glioma atau Meningioma
+      text = `Terdeteksi adanya ${className}. Ini adalah jenis tumor yang memerlukan perhatian medis lebih lanjut untuk diagnosis dan penanganan.`;
+      resultBox.classList.remove("alert-success", "alert-warning");
+      resultBox.classList.add("alert-danger");
+    }
+    interpretationText.textContent = text;
+  }
+
+  // Fungsi untuk membuat atau memperbarui grafik batang
+  function updateChart(labels, data) {
+    // Hancurkan grafik lama jika ada
+    if (probabilityChart) {
+      probabilityChart.destroy();
+    }
+
+    // Buat grafik baru
+    probabilityChart = new Chart(chartCanvas, {
+      type: "bar",
+      data: {
+        labels: labels, // ['Glioma', 'Meningioma', ...]
+        datasets: [
+          {
+            label: "Probabilitas (%)",
+            data: data, // [10.5, 20.1, ...]
+            backgroundColor: [
+              "rgba(255, 99, 132, 0.6)",
+              "rgba(54, 162, 235, 0.6)",
+              "rgba(75, 192, 192, 0.6)",
+              "rgba(255, 206, 86, 0.6)",
+            ],
+            borderColor: [
+              "rgba(255, 99, 132, 1)",
+              "rgba(54, 162, 235, 1)",
+              "rgba(75, 192, 192, 1)",
+              "rgba(255, 206, 86, 1)",
+            ],
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        indexAxis: "y", // Membuat grafik menjadi horizontal bar
+        scales: {
+          x: {
+            beginAtZero: true,
+            max: 100, // Sumbu X (probabilitas) dari 0 sampai 100
+            // --- PERBAIKAN: Menghapus 'ticks: { color: "#fff" }' ---
+          },
+          // --- PERBAIKAN: Menghapus 'y: { ticks: { color: "#fff" } }' ---
+        },
+        plugins: {
+          legend: {
+            display: false, // Sembunyikan legenda
+          },
+        },
+      },
+    });
+  }
+
+  // Fungsi untuk menampilkan error
+  function showError(message) {
+    // --- PERBAIKAN DI SINI ---
+    errorBox.textContent = message;
+    errorBox.classList.remove("d-none"); // Ganti dari style.display
+    resultContainer.classList.add("d-none"); // Ganti dari style.display
+    placeholderText.classList.remove("d-none"); // Ganti dari style.display
+  }
+
+  // Fungsi untuk status loading tombol
+  function setLoading(isLoading) {
+    if (isLoading) {
+      classifyBtn.disabled = true;
+      classifyBtn.innerHTML = `
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                Memproses...
+            `;
+    } else {
+      classifyBtn.disabled = false;
+      classifyBtn.innerHTML = "Klasifikasikan";
+    }
+  }
+</script>
+{% endblock %}
