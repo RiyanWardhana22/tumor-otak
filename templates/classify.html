@@ -70,9 +70,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-  // --- Catatan: Baris 'Chart.defaults.color = "#fff"' dihapus agar mudah dibaca ---
-
-  // Ambil elemen-elemen HTML
   const uploadForm = document.getElementById("upload-form");
   const imageFile = document.getElementById("image-file");
   const previewImage = document.getElementById("preview-image");
@@ -92,46 +89,39 @@
 
   // Elemen Grafik
   const chartCanvas = document.getElementById("probability-chart");
-  let probabilityChart = null; // Variabel untuk menyimpan objek grafik
+  let probabilityChart = null;
 
-  // Tampilkan preview gambar saat pengguna memilih file
   imageFile.addEventListener("change", function (event) {
     const file = event.target.files[0];
     if (file) {
-      // Validasi file (Fitur #3)
       const validTypes = ["image/jpeg", "image/png", "image/jpg"];
       if (!validTypes.includes(file.type)) {
         showError(
           "Format file tidak valid. Harap gunakan .jpg, .png, atau .jpeg"
         );
-        imageFile.value = ""; // Kosongkan input
+        imageFile.value = "";
         return;
       }
 
-      // Validasi ukuran (misal: maks 5MB)
-      const maxSize = 5 * 1024 * 1024; // 5MB
+      const maxSize = 5 * 1024 * 1024;
       if (file.size > maxSize) {
         showError("Ukuran file terlalu besar. Maksimal 5MB.");
-        imageFile.value = ""; // Kosongkan input
+        imageFile.value = "";
         return;
       }
 
-      // Tampilkan preview
       const reader = new FileReader();
       reader.onload = function (e) {
         previewImage.src = e.target.result;
       };
       reader.readAsDataURL(file);
 
-      // --- PERBAIKAN DI SINI ---
-      // Sembunyikan hasil lama/error
-      resultContainer.classList.add("d-none"); // Ganti dari style.display
-      placeholderText.classList.remove("d-none"); // Ganti dari style.display
-      errorBox.classList.add("d-none"); // Ganti dari style.display
+      resultContainer.classList.add("d-none");
+      placeholderText.classList.remove("d-none");
+      errorBox.classList.add("d-none");
     }
   });
 
-  // Kirim gambar ke backend saat form disubmit
   uploadForm.addEventListener("submit", async function (event) {
     event.preventDefault();
     const file = imageFile.files[0];
@@ -153,7 +143,7 @@
 
       if (response.ok) {
         const data = await response.json();
-        showResult(data); // Kirim semua data ke fungsi showResult
+        showResult(data);
       } else {
         const errorData = await response.json();
         showError(errorData.error || "Terjadi error yang tidak diketahui.");
@@ -166,26 +156,18 @@
     }
   });
 
-  // Fungsi untuk menampilkan hasil (Diperbarui)
   function showResult(data) {
-    // Tampilkan teks hasil utama
     resultText.textContent = data.predicted_class;
     confidenceText.textContent = "Probabilitas: " + data.confidence;
-
-    // Tampilkan interpretasi
     showInterpretation(data.predicted_class);
 
-    // --- PERBAIKAN DI SINI ---
-    // Tampilkan kontainer hasil dan sembunyikan placeholder
-    resultContainer.classList.remove("d-none"); // Ganti dari style.display
-    placeholderText.classList.add("d-none"); // Ganti dari style.display
-    errorBox.classList.add("d-none"); // Ganti dari style.display
+    resultContainer.classList.remove("d-none");
+    placeholderText.classList.add("d-none");
+    errorBox.classList.add("d-none");
 
-    // Panggil fungsi untuk membuat/memperbarui grafik
     updateChart(data.class_names, data.probabilities);
   }
 
-  // Fungsi untuk menampilkan interpretasi
   function showInterpretation(className) {
     let text = "";
     if (className === "No Tumor") {
@@ -199,7 +181,6 @@
       resultBox.classList.remove("alert-success", "alert-danger");
       resultBox.classList.add("alert-warning");
     } else {
-      // Glioma atau Meningioma
       text = `Terdeteksi adanya ${className}. Ini adalah jenis tumor yang memerlukan perhatian medis lebih lanjut untuk diagnosis dan penanganan.`;
       resultBox.classList.remove("alert-success", "alert-warning");
       resultBox.classList.add("alert-danger");
@@ -207,22 +188,19 @@
     interpretationText.textContent = text;
   }
 
-  // Fungsi untuk membuat atau memperbarui grafik batang
   function updateChart(labels, data) {
-    // Hancurkan grafik lama jika ada
     if (probabilityChart) {
       probabilityChart.destroy();
     }
 
-    // Buat grafik baru
     probabilityChart = new Chart(chartCanvas, {
       type: "bar",
       data: {
-        labels: labels, // ['Glioma', 'Meningioma', ...]
+        labels: labels,
         datasets: [
           {
             label: "Probabilitas (%)",
-            data: data, // [10.5, 20.1, ...]
+            data: data,
             backgroundColor: [
               "rgba(255, 99, 132, 0.6)",
               "rgba(54, 162, 235, 0.6)",
@@ -240,34 +218,29 @@
         ],
       },
       options: {
-        indexAxis: "y", // Membuat grafik menjadi horizontal bar
+        indexAxis: "y",
         scales: {
           x: {
             beginAtZero: true,
-            max: 100, // Sumbu X (probabilitas) dari 0 sampai 100
-            // --- PERBAIKAN: Menghapus 'ticks: { color: "#fff" }' ---
+            max: 100,
           },
-          // --- PERBAIKAN: Menghapus 'y: { ticks: { color: "#fff" } }' ---
         },
         plugins: {
           legend: {
-            display: false, // Sembunyikan legenda
+            display: false,
           },
         },
       },
     });
   }
 
-  // Fungsi untuk menampilkan error
   function showError(message) {
-    // --- PERBAIKAN DI SINI ---
     errorBox.textContent = message;
-    errorBox.classList.remove("d-none"); // Ganti dari style.display
-    resultContainer.classList.add("d-none"); // Ganti dari style.display
-    placeholderText.classList.remove("d-none"); // Ganti dari style.display
+    errorBox.classList.remove("d-none");
+    resultContainer.classList.add("d-none");
+    placeholderText.classList.remove("d-none");
   }
 
-  // Fungsi untuk status loading tombol
   function setLoading(isLoading) {
     if (isLoading) {
       classifyBtn.disabled = true;
